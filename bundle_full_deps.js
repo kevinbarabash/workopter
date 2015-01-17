@@ -6,17 +6,18 @@ var readFile = q.denodeify(fs.readFile);
 var writeFile = q.denodeify(fs.writeFile);
 var libs = {};
 
-readdir("./deps").then(function (filenames) {
+var srcDir = "./full_deps";
+readdir(srcDir).then(function (filenames) {
     return q.all(filenames.map(function (filename) {
         var name = filename.split(".")[0];
-        var path = "./deps/" + filename;
+        var path = srcDir + "/" + filename;
 
         return readFile(path, { encoding: "utf8" }).then(function (content) {
             libs[name] = content;
         });
     }));
 }).then(function () {
-    writeFile("./bundle/bundle.json", JSON.stringify(libs), { encoding: "utf8" });
+    writeFile("./bundles/full_bundle.json", JSON.stringify(libs, null, "  "), { encoding: "utf8" });
 }).then(function () {
     console.log("success!");
 });

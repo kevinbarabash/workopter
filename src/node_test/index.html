@@ -58,14 +58,20 @@
     
     var require = function(path) {
         if (modules[path] === undefined) {
-            modules[path] = (function () {
-                var exports = undefined;
-                var module = {
-                    exports: exports
-                };
-                eval(deps[path].code);
-                return module.exports;
-            })();
+            console.log("loading: " + path);
+            var code = deps[path].code;
+//            var func = new Function("require", "exports", "module", code);
+
+            var exports = {};
+            var module = { exports: exports };
+
+            var start = performance.now();
+//            func(require, exports, module);
+            eval(code);
+            var elapsed = performance.now() - start;
+            console.log(path + " took " + elapsed + "ms to evaluate");
+            
+            modules[path] = module.exports;
         }
         return modules[path];
     };
@@ -76,5 +82,21 @@
 
     var a = require("./a");
     console.log("a = " + a);
+    
+    
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function (data) {
+        deps = JSON.parse(xhr.responseText);
+        
+        var esprima = require("esprima");
+        var escodegen = require("escodegen");
+        
+        var ast = esprima.parse("var x = 5; console.log('x = ' + x);");
+        console.log(ast);
+        var code = escodegen.generate(ast);
+        console.log(code);
+    };
+    xhr.open("GET", "../../bundles/partial_bundle.json", true);
+    xhr.send();
     
 </script>

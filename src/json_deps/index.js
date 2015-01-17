@@ -34,7 +34,7 @@ codegenWorker2.onmessage = function (e) {
 // TODO: move this into index.html and use Promises so that we can create the workers after loading the deps reliably
 var deps;
 var xhr1 = new XMLHttpRequest();
-xhr1.open("GET", "../../bundle/bundle.json", true);
+xhr1.open("GET", "../../bundles/full_bundle.json", true);
 xhr1.onload = function () {
     deps = JSON.parse(xhr1.responseText);
     profile("eval esprima", function () {
