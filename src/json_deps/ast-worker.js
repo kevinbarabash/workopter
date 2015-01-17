@@ -15,7 +15,8 @@ self.onmessage = function (e) {
     var data = e.data;
     
     if (data.esprima) {
-        eval(data.esprima);
+        (new Function(data.esprima))();
+        //eval(data.esprima);
     } else if (data.code) {
         var ast, json;
 
@@ -24,7 +25,7 @@ self.onmessage = function (e) {
         });
         
         profile("JSON.stringify", function () {
-            json = JSON.stringify(ast);    
+            json = JSON.stringify(ast);
         });
         
         self.postMessage(json);

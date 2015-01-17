@@ -60,14 +60,13 @@
         if (modules[path] === undefined) {
             console.log("loading: " + path);
             var code = deps[path].code;
-//            var func = new Function("require", "exports", "module", code);
+            var func = new Function("require", "exports", "module", code);
 
             var exports = {};
             var module = { exports: exports };
 
             var start = performance.now();
-//            func(require, exports, module);
-            eval(code);
+            func(require, exports, module);
             var elapsed = performance.now() - start;
             console.log(path + " took " + elapsed + "ms to evaluate");
             
@@ -85,11 +84,13 @@
     
     
     var xhr = new XMLHttpRequest();
-    xhr.onload = function (data) {
+    xhr.onload = function () {
         deps = JSON.parse(xhr.responseText);
         
         var esprima = require("esprima");
         var escodegen = require("escodegen");
+        
+        console.log("escodegen version = " + escodegen.version);
         
         var ast = esprima.parse("var x = 5; console.log('x = ' + x);");
         console.log(ast);

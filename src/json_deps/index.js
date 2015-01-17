@@ -35,13 +35,29 @@ codegenWorker2.onmessage = function (e) {
 var deps;
 var xhr1 = new XMLHttpRequest();
 xhr1.open("GET", "../../bundles/full_bundle.json", true);
+
+var useEval = false;
+
 xhr1.onload = function () {
     deps = JSON.parse(xhr1.responseText);
+    if (useEval) {
+        console.log("using eval");
+    } else {
+        console.log("using new Function() exression");
+    }
     profile("eval esprima", function () {
-        eval(deps.esprima);
+        if (useEval) {
+            eval(deps.esprima);
+        } else {
+            (new Function(deps.esprima))();
+        }
     });
     profile("eval escodegen", function () {
-        eval(deps.escodegen);
+        if (useEval) {
+            eval(deps.escodegen);
+        } else {
+            (new Function(deps.escodegen))();
+        }
     });
     astWorker.postMessage({
         esprima: deps.esprima
