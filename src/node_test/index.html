@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+</body>
+</html>
+<script>
+    
+    // start will all of the deps in a single JSON file which is downloaded from the server
+    // this set of deps is like a master bundle containing all source code
+    var deps = {
+        "./a": {
+            code: "var b = require('./b'); console.log('hello from a.js'); module.exports = 'a';",
+            deps: [ "./b" ]
+        },
+        "./b": {
+            code: "console.log('hello from b.js'); module.exports = 'b';",
+            deps: [ ]
+        },
+        "./c": {
+            code: "var a = require('./a'); var b = require('./b'); console.log('hello from c.js'); module.exports = 'c';",
+            deps: [ "./a", "./b" ]
+        }
+    };
+    
+    // for large dependencies such as esprima or structured.js we don't want to 
+    // have to pull in their depdencies in this way... or maybe we do
+    // escodegen contains estraverse which is also used by the debugger
+    
+    var addDep = function(bundle, path, deps) {
+        bundle[path] = deps[path];
+        deps[path].deps.forEach(function (path) {
+            addDep(bundle, path, deps);
+        });
+    };
+    
+    var createBundle = function(path, deps) {
+        var bundle = {};
+        addDep(bundle, path, deps);
+        return bundle;
+    };
+
+    // package code for "./a" which include "./a" and "./b"
+    // keep following dependencies, adding them to the bundle
+    var aBundle = createBundle("./a", deps);
+    var cBundle = createBundle("./c", deps);
+    
+    console.log("a:");
+    console.log(aBundle);
+    console.log("c:");
+    console.log(cBundle);
+    
+    var modules = { };
+    
+    var require = function(path) {
+        if (modules[path] === undefined) {
+            modules[path] = (function () {
+                var exports = undefined;
+                var module = {
+                    exports: exports
+                };
+                eval(deps[path].code);
+                return module.exports;
+            })();
+        }
+        return modules[path];
+    };
+    
+    
+    var c = require("./c");
+    console.log("c = " + c);
+
+    var a = require("./a");
+    console.log("a = " + a);
+    
+</script>
